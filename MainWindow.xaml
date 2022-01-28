@@ -1,0 +1,50 @@
+﻿<Window x:Name="mainWindow"
+        x:Class="CrystalBlue.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CrystalBlue"
+        mc:Ignorable="d"
+        SizeChanged="HandleScreenResized"
+        Title="Crystal Blue" Height="500" Width="750"
+        DataContext="{Binding ElementName=mainWindow}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                  MaxHeight="{Binding ScreenHeight}" MaxWidth="{Binding ScreenWidth}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding Text}" Foreground="{Binding TextColour}" Grid.Column="0" Margin="5,5,5,5" TextWrapping="Wrap"
+                           MaxWidth="{Binding GeneralTextBoxWidth}" HorizontalAlignment="Left"/>
+
+                <DockPanel Grid.Column="1">
+                    <Button Click="HandleFileLoadClick" Content="Load File" Width="60" Height="20" HorizontalAlignment="Right"
+                        Margin="5,5,5,5" DockPanel.Dock="Right" VerticalAlignment="Top"/>
+                    <Button Click="HandleFileReloadClick" Content="Reload File" Width="70" Height="20" HorizontalAlignment="Right"
+                        Margin="5,5,5,5" Visibility="{Binding FileOpened}" DockPanel.Dock="Right" VerticalAlignment="Top"/>
+                </DockPanel>
+                
+            </Grid>
+
+            <DataGrid ItemsSource="{Binding Messages}" AutoGenerateColumns="False" Grid.Row="1" Margin="5,5,5,5" CanUserDeleteRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Line No" Binding="{Binding LineNo}" Width="{Binding LineNo.ActualWidth}"/>
+                    <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="{Binding Message.ActualWidth}"/>
+                    <DataGridTextColumn Header="Line Text" Binding="{Binding Line}" Width="{Binding Line.ActualWidth}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="{Binding FileName}" Foreground="Black" Grid.Row="2" Margin="5,5,5,5"/>
+        </Grid>
+    </ScrollViewer>
+</Window>
