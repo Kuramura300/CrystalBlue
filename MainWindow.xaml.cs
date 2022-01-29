@@ -20,6 +20,7 @@ using GalaSoft.MvvmLight.Command;
 using Hocon;
 using Microsoft.Win32;
 using CrystalBlue.Messages.ViewModels;
+using CrystalBlue.Validation;
 
 namespace CrystalBlue
 {
@@ -28,11 +29,25 @@ namespace CrystalBlue
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
+
+            // Create rule handler, and populate rules
+            ruleHandler = new ValidationRuleHandler( this );
+            PopulateRules();
         }
 
+        //
+        // Public Properties
+        //
+
+        /// <summary>
+        /// Text for instruction, success or error message
+        /// </summary>
         public string Text
         {
             get
@@ -46,6 +61,9 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// Colour for instruction, success or error message
+        /// </summary>
         public Brush TextColour
         {
             get
@@ -59,6 +77,9 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// Width of the window used for scroll viewer auto showing scrollbars
+        /// </summary>
         public double ScreenWidth
         {
             get
@@ -69,6 +90,9 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// Height of the window used for scroll viewer auto showing scrollbars
+        /// </summary>
         public double ScreenHeight
         {
             get
@@ -77,6 +101,9 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// Max width used for the text for the instruction, success or error message
+        /// </summary>
         public double GeneralTextBoxWidth
         {
             get
@@ -92,6 +119,9 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// Shows the Reload File button when there is a file that has been opened
+        /// </summary>
         public Visibility FileOpened
         {
             get
@@ -108,6 +138,9 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// The name of the file to be displayed at the bottom of the view
+        /// </summary>
         public string FileName
         {
             get
@@ -123,7 +156,15 @@ namespace CrystalBlue
             }
         }
 
+        /// <summary>
+        /// Collection of notifications/error messages to be displayed on the DataGrid
+        /// </summary>
         public ObservableCollection<MessageViewModel> Messages { get; set; } = new ObservableCollection<MessageViewModel>();
+
+        /// <summary>
+        /// Collection of Standard Rules to be displayed on the view
+        /// </summary>
+        public ObservableCollection<IValidationRule> StandardRules { get; set; } = new ObservableCollection<IValidationRule>();
 
         //public void Cursed(IHoconElement value)
         //{
@@ -149,26 +190,17 @@ namespace CrystalBlue
         //    }
         //}
 
-        public void CheckForErrors()
-        {
-            var lines = fileText.Split( '\n' );
+        //
+        // Public Methods
+        //
 
-            for ( int i = 0; i < lines.Length; i++ )
-            {
-                var quotations = lines[i].Count( x => x == '\"' );
-
-                if ( quotations > 0 && quotations < 2 )
-                {
-                    var lineNo = i + 1;
-                    var message = ("Potentially missing quotation?");
-
-                    MessageViewModel messageVM = new MessageViewModel( message, lineNo.ToString(), lines[i].Trim() );
-                    Messages.Add( messageVM );
-                    OnPropertyChanged( "Messages" );
-                }
-            }
-        }
-        public void HandleFileLoadClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// When Load File button is clicked, shows dialog for the user to choose a file to open, then attempts to parse as a HOCON file.
+        /// If unable to parse, displays an error. Whether able to parse or not, it will check for validation errors based on enabled rules.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void HandleFileLoadClick( object sender, RoutedEventArgs e )
         {
             Messages.Clear();
 
@@ -194,18 +226,24 @@ namespace CrystalBlue
                     Text = ex.Message + "\n";
                     TextColour = Brushes.Red;
 
-                    if ( ex.Message.Contains( "Error while tokenizing Hocon") )
-                    {
-                        MessageViewModel messageVM = new MessageViewModel( "Check your brackets.", "N/A" );
-                        Messages.Add( messageVM );
-                        OnPropertyChanged( "Messages" );
-                    }
+                    //if ( ex.Message.Contains( "Error while tokenizing Hocon") )
+                    //{
+                    //    MessageViewModel messageVM = new MessageViewModel( "Check your brackets.", "N/A" );
+                    //    Messages.Add( messageVM );
+                    //    OnPropertyChanged( "Messages" );
+                    //}
                 }
 
-                CheckForErrors();
+                RunRules();
             }
         }
 
+        /// <summary>
+        /// When Reload File button is clicked, and if a file path is defined, attempts to parse as a HOCON file.
+        /// If unable to parse, displays an error. Whether able to parse or not, it will check for validation errors based on enabled rules.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void HandleFileReloadClick( object sender, RoutedEventArgs e )
         {
             Messages.Clear();
@@ -227,35 +265,84 @@ namespace CrystalBlue
                     Text = ex.Message + "\n";
                     TextColour = Brushes.Red;
 
-                    if ( ex.Message.Contains( "Error while tokenizing Hocon" ) )
-                    {
-                        MessageViewModel messageVM = new MessageViewModel( "Check your brackets.", "N/A" );
-                        Messages.Add( messageVM );
-                        OnPropertyChanged( "Messages" );
-                    }
+                    //if ( ex.Message.Contains( "Error while tokenizing Hocon" ) )
+                    //{
+                    //    MessageViewModel messageVM = new MessageViewModel( "Check your brackets.", "N/A" );
+                    //    Messages.Add( messageVM );
+                    //    OnPropertyChanged( "Messages" );
+                    //}
                 }
 
-                CheckForErrors();
+                RunRules();
             }
         }
 
-        public void HandleScreenResized(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// When the window is resized, raise property changed for screen width/height for the scrollbars to update
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void HandleScreenResized( object sender, RoutedEventArgs e )
         {
             OnPropertyChanged( "ScreenWidth" );
             OnPropertyChanged( "ScreenHeight" );
         }
 
+        //
+        // Property Changed Event
+        //
+
+        /// <summary>
+        /// Property Changed Event Handler
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged( [CallerMemberName] string name = null )
+        /// <summary>
+        /// Handles the raising of property changed to update the view
+        /// </summary>
+        /// <param name="name"></param>
+        public void OnPropertyChanged( [CallerMemberName] string name = null )
         {
             PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( name ) );
         }
 
-        private string text = "Open a file to check.";
+        //
+        // Private Methods
+        //
+        
+        /// <summary>
+        /// Populates rule collections
+        /// </summary>
+        private void PopulateRules()
+        {
+            StandardRules = ruleHandler.GetStandardRules();
+            OnPropertyChanged( "StandardRules" );
+        }
+
+        /// <summary>
+        /// Run all enabled rules
+        /// </summary>
+        private void RunRules()
+        {
+            // Standard Rules
+            foreach ( var rule in StandardRules.Where( x => x.IsEnabled == true ) )
+            {
+                rule.Run( fileText );
+            }
+        }
+
+        //
+        // Private Members
+        //
+
+        private string text = "Open a file to validate.";
         private Brush textColour = Brushes.Black;
+
         private string filePath = null;
         private string fileText = null;
+
         private Config configFileData;
+
+        private ValidationRuleHandler ruleHandler = null;
     }
 }

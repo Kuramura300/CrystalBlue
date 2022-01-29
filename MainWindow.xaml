@@ -10,41 +10,80 @@
         Title="Crystal Blue" Height="500" Width="750"
         DataContext="{Binding ElementName=mainWindow}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                  MaxHeight="{Binding ScreenHeight}" MaxWidth="{Binding ScreenWidth}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="auto"/>
-                </Grid.ColumnDefinitions>
+    <Grid MaxHeight="{Binding ScreenHeight}" MaxWidth="{Binding ScreenWidth}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52"/>
+            <RowDefinition/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
 
-                <TextBlock Text="{Binding Text}" Foreground="{Binding TextColour}" Grid.Column="0" Margin="5,5,5,5" TextWrapping="Wrap"
-                           MaxWidth="{Binding GeneralTextBoxWidth}" HorizontalAlignment="Left"/>
+        <!--Top Ribbon-->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
 
-                <DockPanel Grid.Column="1">
-                    <Button Click="HandleFileLoadClick" Content="Load File" Width="60" Height="20" HorizontalAlignment="Right"
-                        Margin="5,5,5,5" DockPanel.Dock="Right" VerticalAlignment="Top"/>
-                    <Button Click="HandleFileReloadClick" Content="Reload File" Width="70" Height="20" HorizontalAlignment="Right"
-                        Margin="5,5,5,5" Visibility="{Binding FileOpened}" DockPanel.Dock="Right" VerticalAlignment="Top"/>
-                </DockPanel>
-                
-            </Grid>
+            <TextBlock Text="{Binding Text}" Foreground="{Binding TextColour}" Grid.Column="0" Margin="5,5,5,5" TextWrapping="Wrap"
+                           MaxWidth="{Binding GeneralTextBoxWidth}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-            <DataGrid ItemsSource="{Binding Messages}" AutoGenerateColumns="False" Grid.Row="1" Margin="5,5,5,5" CanUserDeleteRows="False">
+            <DockPanel Grid.Column="1">
+                <Button Click="HandleFileLoadClick" Content="Load File" Width="60" Height="40" HorizontalAlignment="Right"
+                        Margin="5,5,5,5" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+                <Button Click="HandleFileReloadClick" Content="Reload File" Width="70" Height="40" HorizontalAlignment="Right"
+                        Margin="5,5,5,5" Visibility="{Binding FileOpened}" DockPanel.Dock="Right" VerticalAlignment="Center"/>
+            </DockPanel>
+
+        </Grid>
+
+        <!--Main Area-->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Border x:Name="ValidationSection" BorderBrush="LightGray" Grid.Column="0" BorderThickness="2" Margin="5,5,5,5">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="{Binding ElementName=ValidationSection, Path=ActualHeight}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="auto"/> <!--Empty space to push other rows up-->
+                        </Grid.RowDefinitions>
+
+                        <Label Content="Validation Rules" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0" Margin="3,3,3,3"/>
+
+                        <Expander Header="Standard Rules" Grid.Row="1" VerticalAlignment="Top" Margin="1,1,1,1" IsExpanded="True">
+                            <DataGrid ItemsSource="{Binding StandardRules}" AutoGenerateColumns="False" Margin="3,3,3,3" CanUserDeleteRows="False">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <DataGridTextColumn Header="Rule" Binding="{Binding RuleName}" IsReadOnly="True"/>
+                                    <DataGridTemplateColumn Header="Info">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Command="{Binding ShowInfoCommand}" Content="View"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Expander>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+
+            <DataGrid ItemsSource="{Binding Messages}" AutoGenerateColumns="False" Margin="5,5,5,5" CanUserDeleteRows="False" Grid.Column="1"
+                          IsReadOnly="True">
                 <DataGrid.Columns>
+                    <DataGridTextColumn Header="Rule" Binding="{Binding Rule}" Width="{Binding Rule.ActualWidth}"/>
                     <DataGridTextColumn Header="Line No" Binding="{Binding LineNo}" Width="{Binding LineNo.ActualWidth}"/>
                     <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="{Binding Message.ActualWidth}"/>
                     <DataGridTextColumn Header="Line Text" Binding="{Binding Line}" Width="{Binding Line.ActualWidth}"/>
                 </DataGrid.Columns>
             </DataGrid>
-
-            <TextBlock Text="{Binding FileName}" Foreground="Black" Grid.Row="2" Margin="5,5,5,5"/>
         </Grid>
-    </ScrollViewer>
+
+        <TextBlock Text="{Binding FileName}" Foreground="Black" Grid.Row="2" Margin="5,5,5,5" VerticalAlignment="Center"/>
+    </Grid>
 </Window>
