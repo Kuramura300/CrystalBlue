@@ -1,4 +1,5 @@
-﻿using CrystalBlue.Messages.ViewModels;
+﻿using CrystalBlue.HOCONValidator.ViewModels;
+using CrystalBlue.Messages.ViewModels;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace CrystalBlue.Validation.StandardRules
+namespace CrystalBlue.HOCONValidator.Validation.StandardRules
 {
     /// <summary>
     /// Rule regarding quotations
@@ -19,9 +20,9 @@ namespace CrystalBlue.Validation.StandardRules
         /// Instantiates a new instance of this rule
         /// </summary>
         /// <param name="window"></param>
-        public QuotationsRule( MainWindow window )
+        public QuotationsRule( HOCONValidatorViewModel vm )
         {
-            this.window = window;
+            this.vm = vm;
         }
 
         /// <inheritdoc />
@@ -54,8 +55,8 @@ namespace CrystalBlue.Validation.StandardRules
 
                     // Create message to be displayed on the view and add it
                     MessageViewModel messageVM = new MessageViewModel( RuleName, message, lineNo.ToString(), lines[i].Trim() );
-                    window.Messages.Add( messageVM );
-                    window.OnPropertyChanged( "Messages" );
+                    vm.Messages.Add( messageVM );
+                    vm.OnPropertyChanged( "Messages" );
                 }
             }
         }
@@ -71,6 +72,6 @@ namespace CrystalBlue.Validation.StandardRules
             MessageBox.Show( RuleDescription, RuleName );
         }
 
-        private MainWindow window = null;
+        private HOCONValidatorViewModel vm = null;
     }
 }
