@@ -96,9 +96,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Validation\IValidationRule.cs" />
-    <Compile Include="Validation\StandardRules\QuotationsRule.cs" />
-    <Compile Include="Validation\ValidationRuleHandler.cs" />
+    <Compile Include="Base\ViewModelBase.cs" />
+    <Compile Include="HOCONValidator\ViewModels\HOCONValidatorViewModel.cs" />
+    <Compile Include="HOCONValidator\Views\HOCONValidatorView.xaml.cs">
+      <DependentUpon>HOCONValidatorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HOCONValidator\Validation\IValidationRule.cs" />
+    <Compile Include="HOCONValidator\Validation\StandardRules\QuotationsRule.cs" />
+    <Compile Include="HOCONValidator\Validation\ValidationRuleHandler.cs" />
+    <Page Include="HOCONValidator\Views\HOCONValidatorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

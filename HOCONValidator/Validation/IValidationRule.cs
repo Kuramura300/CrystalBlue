@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace CrystalBlue.Validation
+namespace CrystalBlue.HOCONValidator.Validation
 {
     /// <summary>
     /// Interface used for defining a validation rule

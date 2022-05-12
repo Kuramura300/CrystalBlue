@@ -1,4 +1,5 @@
-﻿using CrystalBlue.Validation.StandardRules;
+﻿using CrystalBlue.HOCONValidator.ViewModels;
+using CrystalBlue.HOCONValidator.Validation.StandardRules;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CrystalBlue.Validation
+namespace CrystalBlue.HOCONValidator.Validation
 {
     /// <summary>
     /// Class for handling the validation rules
@@ -16,9 +17,9 @@ namespace CrystalBlue.Validation
         /// <summary>
         /// Instantiates an instance of the Validation Rule Handler
         /// </summary>
-        public ValidationRuleHandler( MainWindow window )
+        public ValidationRuleHandler( HOCONValidatorViewModel vm )
         {
-            this.window = window;
+            this.vm = vm;
         }
 
         /// <summary>
@@ -29,11 +30,11 @@ namespace CrystalBlue.Validation
         {
             ObservableCollection<IValidationRule> rules = new ObservableCollection<IValidationRule>();
 
-            rules.Add( new QuotationsRule( window ) );
+            rules.Add( new QuotationsRule( vm ) );
 
             return rules;
         }
 
-        private MainWindow window;
+        private HOCONValidatorViewModel vm;
     }
 }
